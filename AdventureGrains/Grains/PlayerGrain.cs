@@ -10,13 +10,12 @@ using System.Threading.Tasks;
 
 namespace AdventureGrains
 {
-    public class PlayerGrain : Orleans.Grain, IPlayerGrain
+    public class PlayerGrain : Grain<PlayerInfo>, IPlayerGrain
     {
         private readonly MyComponent component;
         IRoomGrain roomGrain; // Current room
         List<Thing> things = new List<Thing>(); // Things that the player is carrying
         bool killed = false;
-        PlayerInfo myInfo;
 
         public PlayerGrain(MyComponent component)
         {
@@ -24,10 +23,11 @@ namespace AdventureGrains
             this.component = component;
         }
 
-        public override Task OnActivateAsync()
+        public override async Task OnActivateAsync()
         {
-            this.myInfo = new PlayerInfo { Key = this.GetPrimaryKey(), Name = "nobody" };
-            return base.OnActivateAsync();
+            this.State = new PlayerInfo { Key = this.GetPrimaryKey(), Name = "nobody" };
+            await this.WriteStateAsync();
+            await base.OnActivateAsync();
         }
 
         public override Task OnDeactivateAsync()
@@ -50,7 +50,7 @@ namespace AdventureGrains
         {
             var moster = this.GrainFactory.GetGrain<IMonsterGrain>(0);
 
-            return new ValueTask<string>(myInfo.Name);
+            return new ValueTask<string>(this.State.Name);
         }
 
         Task<IRoomGrain> IPlayerGrain.RoomGrain()
@@ -61,9 +61,10 @@ namespace AdventureGrains
 
         async Task<string> IPlayerGrain.Die()
         {
-            myInfo.Health -= 2;
+            this.State.Health -= 2;
+            await this.WriteStateAsync();
 
-            if (myInfo.Health == 0)
+            if (this.State.Health == 0)
             {
                 // Drop everything
                 var tasks = new List<Task<string>>();
@@ -76,16 +77,16 @@ namespace AdventureGrains
                 // Exit the game
                 if (this.roomGrain != null)
                 {
-                    await this.roomGrain.Exit(myInfo);
+                    await this.roomGrain.Exit(this.State);
                     this.roomGrain = null;
                     killed = true;
                 }
 
-                return this.myInfo.Name + " is now dead.";
+                return this.State.Name + " is now dead.";
             }
             else
             {
-                return $"Ouch! {this.myInfo.Name} now has {this.myInfo.Health} health";
+                return $"Ouch! {this.State.Name} now has {this.State.Health} health";
             }
         }
 
@@ -122,14 +123,14 @@ namespace AdventureGrains
 
         Task IPlayerGrain.SetName(string name)
         {
-            this.myInfo.Name = name;
-            return Task.CompletedTask;
+            this.State.Name = name;
+            return this.WriteStateAsync();
         }
 
         Task IPlayerGrain.SetRoomGrain(IRoomGrain room)
         {
             this.roomGrain = room;
-            return room.Enter(myInfo);
+            return room.Enter(this.State);
         }
 
         async Task<string> Go(string direction)
@@ -140,11 +141,11 @@ namespace AdventureGrains
 
             if (destination != null)
             {
-                await this.roomGrain.Exit(myInfo);
-                await destination.Enter(myInfo);
+                await this.roomGrain.Exit(this.State);
+                await destination.Enter(this.State);
 
                 this.roomGrain = destination;
-                var desc = await destination.Description(myInfo);
+                var desc = await destination.Description(this.State);
 
                 if (desc != null)
                     description.Append(desc);
@@ -173,7 +174,7 @@ namespace AdventureGrains
 
             // Go to room '-2', which is the place of no return.
             var room = GrainFactory.GetGrain<IRoomGrain>(-2);
-            return await room.Description(myInfo);
+            return await room.Description(this.State);
         }
 
         async Task<string> Kill(string target)
@@ -249,8 +250,8 @@ namespace AdventureGrains
             switch (verb)
             {
                 case "look":
-                    return $"{myInfo.Name} has {myInfo.Health} health." + Environment.NewLine +
-                        await this.roomGrain.Description(myInfo);
+                    return $"{this.State.Name} has {this.State.Health} health." + Environment.NewLine +
+                        await this.roomGrain.Description(this.State);
 
                 case "go":
                     if (words.Length == 1)

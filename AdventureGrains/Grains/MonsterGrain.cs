@@ -27,7 +27,7 @@ namespace AdventureGrains
             this.moveMonsterReminder = await RegisterOrUpdateReminder(
                 "MoveMonster",
                 TimeSpan.FromSeconds(150),
-                TimeSpan.FromSeconds(30));
+                TimeSpan.FromSeconds(60));
             await base.OnActivateAsync();
         }
 

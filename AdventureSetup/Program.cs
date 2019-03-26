@@ -50,8 +50,6 @@ namespace AdventureSetup
                 .ConfigureServices(
                     services =>
                     {
-                        services.AddTransient(sp =>
-                            MyComponent.Create(sp.GetRequiredService<IGrainActivationContext>()));
                     })
                 .ConfigureApplicationParts(
                     parts => parts.AddApplicationPart(typeof(RoomGrain).Assembly).WithReferences())

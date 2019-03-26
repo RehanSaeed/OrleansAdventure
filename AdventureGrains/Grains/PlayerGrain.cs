@@ -12,15 +12,13 @@ namespace AdventureGrains
 {
     public class PlayerGrain : Grain<PlayerInfo>, IPlayerGrain
     {
-        private readonly MyComponent component;
         IRoomGrain roomGrain; // Current room
         List<Thing> things = new List<Thing>(); // Things that the player is carrying
         bool killed = false;
 
-        public PlayerGrain(MyComponent component)
+        public PlayerGrain()
         {
             Console.WriteLine("Started: " + RequestContext.Get("TraceId"));
-            this.component = component;
         }
 
         public override async Task OnActivateAsync()

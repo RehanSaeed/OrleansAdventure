@@ -1,11 +1,9 @@
+using System;
 using AdventureGrainInterfaces;
 using Orleans;
-using System;
-using System.Net;
-using Orleans.Runtime;
-using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.Runtime;
 
 namespace AdventureClient
 {
@@ -20,6 +18,7 @@ namespace AdventureClient
                     options.ClusterId = "dev";
                     options.ServiceId = "AdventureApp";
                 })
+                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .ConfigureApplicationParts(
                     parts => parts
                         .AddApplicationPart(typeof(IRoomGrain).Assembly)

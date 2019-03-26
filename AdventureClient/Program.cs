@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using AdventureGrainInterfaces;
 using Orleans;
 using Orleans.Configuration;
@@ -9,7 +10,7 @@ namespace AdventureClient
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var client = new ClientBuilder()
                 .UseLocalhostClustering()
@@ -25,7 +26,7 @@ namespace AdventureClient
                         .WithReferences())
                 .Build();
 
-            client.Connect().Wait();
+            await client.Connect();
 
             Console.WriteLine(@"
   ___      _                 _                  
@@ -42,9 +43,9 @@ namespace AdventureClient
             RequestContext.Set("TraceId", new Guid());
 
             var player = client.GetGrain<IPlayerGrain>(Guid.NewGuid());
-            player.SetName(name).Wait();
+            await player.SetName(name);
             var room1 = client.GetGrain<IRoomGrain>(0);
-            player.SetRoomGrain(room1).Wait();
+            await player.SetRoomGrain(room1);
 
             Console.WriteLine(player.Play("look").Result);
 

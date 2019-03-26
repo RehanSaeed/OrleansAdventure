@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Net;
+using System.Reflection;
+using System.Threading.Tasks;
 using AdventureGrainInterfaces;
 using AdventureGrains;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,17 +11,12 @@ using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Runtime;
-using System;
-using System.IO;
-using System.Net;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace AdventureSetup
 {
     class Program
     {
-        static int Main(string [] args)
+        static async Task<int> Main(string [] args)
         {
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string mapFileName = Path.Combine (path, "AdventureMap.json");
@@ -74,11 +74,11 @@ namespace AdventureSetup
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 
-            RunAsync(silo, client, mapFileName).Wait();
+            await RunAsync(silo, client, mapFileName);
 
             Console.ReadLine();
 
-            StopAsync(silo, client).Wait();
+            await StopAsync(silo, client);
 
             return 0;
         }

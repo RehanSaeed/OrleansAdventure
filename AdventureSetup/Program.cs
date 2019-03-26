@@ -4,13 +4,13 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using AdventureGrainInterfaces;
+using AdventureGrainInterfaces.Constants;
 using AdventureGrains;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
-using Orleans.Runtime;
 
 namespace AdventureSetup
 {
@@ -39,12 +39,25 @@ namespace AdventureSetup
                 return -2;
             }
 
-            var silo = new SiloHostBuilder()
+            var siloHost = CreateSiloHostBuilder().Build();
+            var clusterClient = CreateClientBuilder().Build();
+
+            await RunAsync(siloHost, clusterClient, mapFileName);
+
+            Console.ReadLine();
+
+            await StopAsync(siloHost, clusterClient);
+
+            return 0;
+        }
+
+        private static ISiloHostBuilder CreateSiloHostBuilder() =>
+            new SiloHostBuilder()
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "AdventureApp";
+                    options.ClusterId = Cluster.ClusterId;
+                    options.ServiceId = Cluster.ServiceId;
                 })
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureServices(
@@ -58,28 +71,18 @@ namespace AdventureSetup
                 .AddAzureTableGrainStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .UseAzureTableReminderService(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .UseTransactions(withStatisticsReporter: true)
-                .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
-                .Build();
+                .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true");
 
-            var client = new ClientBuilder()
-                .UseLocalhostClustering()
+        private static IClientBuilder CreateClientBuilder() =>
+            new ClientBuilder()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "AdventureApp";
+                    options.ClusterId = Cluster.ClusterId;
+                    options.ServiceId = Cluster.ServiceId;
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IRoomGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
-                .Build();
-
-            await RunAsync(silo, client, mapFileName);
-
-            Console.ReadLine();
-
-            await StopAsync(silo, client);
-
-            return 0;
-        }
+                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true");
 
         static async Task RunAsync(ISiloHost silo, IClusterClient client, string mapFileName)
         {

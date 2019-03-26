@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using AdventureGrainInterfaces;
+using AdventureGrainInterfaces.Constants;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -13,11 +14,10 @@ namespace AdventureClient
         static async Task Main(string[] args)
         {
             var client = new ClientBuilder()
-                .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "AdventureApp";
+                    options.ClusterId = Cluster.ClusterId;
+                    options.ServiceId = Cluster.ServiceId;
                 })
                 .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .ConfigureApplicationParts(

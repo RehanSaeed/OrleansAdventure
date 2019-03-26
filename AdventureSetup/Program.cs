@@ -56,9 +56,11 @@ namespace AdventureSetup
                 .ConfigureApplicationParts(
                     parts => parts.AddApplicationPart(typeof(RoomGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
-                .UseAzureTableReminderService(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 // .AddMemoryGrainStorage("Default")
-                .AddAzureTableGrainStorage("Default", options => options.ConnectionString = "UseDevelopmentStorage=true")
+                .AddAzureTableGrainStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
+                .UseAzureTableReminderService(options => options.ConnectionString = "UseDevelopmentStorage=true")
+                .UseTransactions(withStatisticsReporter: true)
+                .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .Build();
 
             var client = new ClientBuilder()

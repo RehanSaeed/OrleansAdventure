@@ -11,6 +11,8 @@
     <PackageReference Include="Microsoft.Orleans.Persistence.AzureStorage" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.Reminders.AzureStorage" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Orleans.Transactions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Orleans.Transactions.AzureStorage" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="2.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

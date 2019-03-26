@@ -74,7 +74,12 @@ namespace AdventureSetup
                     parts => parts.AddApplicationPart(typeof(RoomGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
                 // .AddMemoryGrainStorage("Default")
-                .AddAzureTableGrainStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
+                .AddAzureTableGrainStorageAsDefault(
+                    options =>
+                    {
+                        options.ConnectionString = "UseDevelopmentStorage=true";
+                        options.UseJson = true;
+                    })
                 .UseAzureTableReminderService(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .UseTransactions(withStatisticsReporter: true)
                 .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true");

@@ -53,7 +53,6 @@ namespace AdventureSetup
 
         private static ISiloHostBuilder CreateSiloHostBuilder() =>
             new SiloHostBuilder()
-                .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = Cluster.ClusterId;
@@ -73,6 +72,7 @@ namespace AdventureSetup
                 .ConfigureApplicationParts(
                     parts => parts.AddApplicationPart(typeof(RoomGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
+                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 // .AddMemoryGrainStorage("Default")
                 .AddAzureTableGrainStorageAsDefault(
                     options =>

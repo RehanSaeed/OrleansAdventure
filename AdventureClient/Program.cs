@@ -14,12 +14,12 @@ namespace AdventureClient
         static async Task Main(string[] args)
         {
             var client = new ClientBuilder()
+                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = Cluster.ClusterId;
                     options.ServiceId = Cluster.ServiceId;
                 })
-                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .ConfigureApplicationParts(
                     parts => parts
                         .AddApplicationPart(typeof(IRoomGrain).Assembly)

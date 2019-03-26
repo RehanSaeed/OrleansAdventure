@@ -53,6 +53,7 @@ namespace AdventureSetup
 
         private static ISiloHostBuilder CreateSiloHostBuilder() =>
             new SiloHostBuilder()
+                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = Cluster.ClusterId;
@@ -72,7 +73,6 @@ namespace AdventureSetup
                 .ConfigureApplicationParts(
                     parts => parts.AddApplicationPart(typeof(RoomGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
-                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 // .AddMemoryGrainStorage("Default")
                 .AddAzureTableGrainStorageAsDefault(
                     options =>
@@ -86,14 +86,14 @@ namespace AdventureSetup
 
         private static IClientBuilder CreateClientBuilder() =>
             new ClientBuilder()
+                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = Cluster.ClusterId;
                     options.ServiceId = Cluster.ServiceId;
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IRoomGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddConsole())
-                .UseAzureStorageClustering(options => options.ConnectionString = "UseDevelopmentStorage=true");
+                .ConfigureLogging(logging => logging.AddConsole());
 
         static async Task RunAsync(ISiloHost silo, IClusterClient client, string mapFileName)
         {

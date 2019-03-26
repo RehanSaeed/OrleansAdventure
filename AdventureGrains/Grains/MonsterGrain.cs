@@ -11,14 +11,12 @@ namespace AdventureGrains
 {
     public class MonsterGrain : Orleans.Grain, IMonsterGrain, IRemindable
     {
-        private readonly MyComponent component;
         private MonsterInfo monsterInfo = new MonsterInfo();
         private IRoomGrain roomGrain; // Current room
         private IGrainReminder moveMonsterReminder;
 
-        public MonsterGrain(MyComponent component)
+        public MonsterGrain()
         {
-            this.component = component;
         }
 
         public override async Task OnActivateAsync()

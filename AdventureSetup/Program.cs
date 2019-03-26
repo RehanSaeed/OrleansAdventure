@@ -59,7 +59,13 @@ namespace AdventureSetup
                     options.ClusterId = Cluster.ClusterId;
                     options.ServiceId = Cluster.ServiceId;
                 })
-                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                .Configure<EndpointOptions>(
+                    options =>
+                    {
+                        options.AdvertisedIPAddress = IPAddress.Loopback;
+                        // options.GatewayPort = 30000; // Default
+                        // options.SiloPort = 11111; // Default
+                    })
                 .ConfigureServices(
                     services =>
                     {

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.Statistics;
 using Orleans.TelemetryConsumers.AI;
 
 namespace AdventureSetup
@@ -83,7 +84,9 @@ namespace AdventureSetup
                     })
                 .UseAzureTableReminderService(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .UseTransactions(withStatisticsReporter: true)
-                .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true");
+                .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
+                .UsePerfCounterEnvironmentStatistics() // TODO: This is Windows only.
+                .UseDashboard(options => { });
 
         private static IClientBuilder CreateClientBuilder() =>
             new ClientBuilder()

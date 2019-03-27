@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.TelemetryConsumers.AI;
 
 namespace AdventureSetup
 {
@@ -66,6 +67,7 @@ namespace AdventureSetup
                         // options.GatewayPort = 30000; // Default
                         // options.SiloPort = 11111; // Default
                     })
+                // .AddApplicationInsightsTelemetryConsumer("")
                 .ConfigureServices(
                     services =>
                     {
@@ -73,7 +75,6 @@ namespace AdventureSetup
                 .ConfigureApplicationParts(
                     parts => parts.AddApplicationPart(typeof(RoomGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
-                // .AddMemoryGrainStorage("Default")
                 .AddAzureTableGrainStorageAsDefault(
                     options =>
                     {

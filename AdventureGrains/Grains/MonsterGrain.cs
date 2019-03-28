@@ -1,15 +1,12 @@
+using System;
+using System.Threading.Tasks;
 using AdventureGrainInterfaces;
 using Orleans;
 using Orleans.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdventureGrains
 {
-    public class MonsterGrain : Orleans.Grain, IMonsterGrain, IRemindable
+    public class MonsterGrain : Grain, IMonsterGrain, IRemindable
     {
         private MonsterInfo monsterInfo = new MonsterInfo();
         private IRoomGrain roomGrain; // Current room

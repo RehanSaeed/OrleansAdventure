@@ -6,6 +6,7 @@ using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Runtime;
+using Orleans.Streams;
 
 namespace AdventureClient
 {
@@ -24,9 +25,24 @@ namespace AdventureClient
                     parts => parts
                         .AddApplicationPart(typeof(IRoomGrain).Assembly)
                         .WithReferences())
+                .AddSimpleMessageStreamProvider(StreamProviderName.Default)
                 .Build();
 
             await client.Connect();
+
+            var streamProvider = client.GetStreamProvider(StreamProviderName.Default);
+            var monsterEnteredRoomStream = streamProvider.GetStream<(MonsterInfo monsterInfo, RoomInfo roomInfo)>(Guid.Empty, StreamName.MonsterEnteredRoom);
+            var playerEnteredRoomStream = streamProvider.GetStream<(PlayerInfo playerInfo, RoomInfo roomInfo)>(Guid.Empty, StreamName.PlayerEnteredRoom);
+            var monsterEnteredRoomSubscription = await monsterEnteredRoomStream.SubscribeAsync(
+                async (x, token) =>
+                {
+                    Console.WriteLine($"{x.monsterInfo.Name} entered {x.roomInfo.Name}");
+                });
+            var playerEnteredRoomSubscription = await playerEnteredRoomStream.SubscribeAsync(
+                async (x, token) =>
+                {
+                    Console.WriteLine($"{x.playerInfo.Name} entered {x.roomInfo.Name}");
+                });
 
             Console.WriteLine(@"
   ___      _                 _                  

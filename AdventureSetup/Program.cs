@@ -85,6 +85,8 @@ namespace AdventureSetup
                 .UseAzureTableReminderService(options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .UseTransactions(withStatisticsReporter: true)
                 .AddAzureTableTransactionalStateStorageAsDefault(options => options.ConnectionString = "UseDevelopmentStorage=true")
+                .AddSimpleMessageStreamProvider(StreamProviderName.Default)
+                .AddAzureTableGrainStorage("PubSubStore", options => options.ConnectionString = "UseDevelopmentStorage=true")
                 .UsePerfCounterEnvironmentStatistics() // TODO: This is Windows only.
                 .UseDashboard(options => { });
 

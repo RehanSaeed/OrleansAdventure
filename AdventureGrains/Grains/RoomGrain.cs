@@ -1,5 +1,8 @@
 using AdventureGrainInterfaces;
+using AdventureGrainInterfaces.Constants;
 using Orleans;
+using Orleans.Streams;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,20 +17,20 @@ namespace AdventureGrains
     {
         // TODO: replace placeholder grain interface with actual grain
         // communication interface(s).
-
-        string description;
-
+        private RoomInfo roomInfo;
         List<PlayerInfo> players = new List<PlayerInfo>();
         List<MonsterInfo> monsters = new List<MonsterInfo>();
         List<Thing> things = new List<Thing>();
-
         Dictionary<string, IRoomGrain> exits = new Dictionary<string, IRoomGrain>();
 
-        Task IRoomGrain.Enter(PlayerInfo player)
+        async Task IRoomGrain.Enter(PlayerInfo player)
         {
             players.RemoveAll(x => x.Key == player.Key);
             players.Add(player);
-            return Task.CompletedTask;
+
+            var streamProvider = GetStreamProvider(StreamProviderName.Default);
+            var playerEnteredRoomStream = streamProvider.GetStream<(PlayerInfo, RoomInfo)>(Guid.Empty, StreamName.PlayerEnteredRoom);
+            await playerEnteredRoomStream.OnNextAsync((player, this.roomInfo));
         }
 
         Task IRoomGrain.Exit(PlayerInfo player)
@@ -36,11 +39,14 @@ namespace AdventureGrains
             return Task.CompletedTask;
         }
 
-        Task IRoomGrain.Enter(MonsterInfo monster)
+        async Task IRoomGrain.Enter(MonsterInfo monster)
         {
             monsters.RemoveAll(x => x.Id == monster.Id);
             monsters.Add(monster);
-            return Task.CompletedTask;
+
+            var streamProvider = GetStreamProvider(StreamProviderName.Default);
+            var monsterEnteredRoomStream = streamProvider.GetStream<(MonsterInfo, RoomInfo)>(Guid.Empty, StreamName.MonsterEnteredRoom);
+            await monsterEnteredRoomStream.OnNextAsync((monster, this.roomInfo));
         }
 
         Task IRoomGrain.Exit(MonsterInfo monster)
@@ -64,7 +70,7 @@ namespace AdventureGrains
 
         Task IRoomGrain.SetInfo(RoomInfo info)
         {
-            this.description = info.Description;
+            this.roomInfo = info;
 
             foreach (var kv in info.Directions)
             {
@@ -94,7 +100,7 @@ namespace AdventureGrains
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(this.description);
+            sb.AppendLine(this.roomInfo.Description);
 
             if (things.Count > 0)
             {

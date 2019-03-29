@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using AdventureGrainInterfaces;
@@ -61,6 +62,7 @@ namespace AdventureSetup
                     options.ClusterId = Cluster.ClusterId;
                     options.ServiceId = Cluster.ServiceId;
                 })
+                // .ConfigureEndpoints(11111, 30000, AddressFamily.InterNetwork, true) // For Docker/Kubernetes
                 .Configure<EndpointOptions>(
                     options =>
                     {
